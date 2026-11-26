@@ -1,5 +1,6 @@
 package com.example.appventas.ui.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,6 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.appventas.model.data.local.VentaEntity
 import com.example.appventas.model.esEditable
+import com.example.appventas.model.filtrarVentas
+import com.example.appventas.model.formatoPesos
+import com.example.appventas.ui.components.EstadoChip
+import com.example.appventas.ui.components.FiltroOpciones
 import com.example.appventas.viewmodel.VentaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,10 +57,8 @@ fun ListaVentasScreen(
 ) {
     val estado by viewModel.estado.collectAsState()
 
-    // Búsqueda por código de autorización
-    val ventasMostradas = estado.ventas.filter {
-        it.codigoAutorizacion.contains(estado.busqueda.trim(), ignoreCase = true)
-    }
+    // Búsqueda por texto y filtro por estado
+    val ventasMostradas = filtrarVentas(estado.ventas, estado.busqueda, estado.filtroEstado)
 
     Scaffold(
         topBar = {
@@ -92,12 +95,19 @@ fun ListaVentasScreen(
         OutlinedTextField(
             value = estado.busqueda,
             onValueChange = viewModel::onBusquedaChange,
-            label = { Text("Buscar por código") },
+            label = { Text("Buscar por código, cliente o convenio") },
             leadingIcon = {
                 Icon(Icons.Default.Search, contentDescription = "Buscar")
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
+        )
+
+        // Filtro por estado (los estados vienen de la tabla "estados" de Room)
+        FiltroOpciones(
+            opciones = estado.estados.map { it.nombre },
+            seleccionado = estado.filtroEstado,
+            onSeleccion = viewModel::onFiltroEstadoChange
         )
 
         Text(
@@ -116,6 +126,9 @@ fun ListaVentasScreen(
                 items(ventasMostradas, key = { it.id }) { venta ->
                     VentaCard(
                         venta = venta,
+                        onVerClick = {
+                            navController.navigate("detalleVenta/${venta.id}")
+                        },
                         onEditarClick = {
                             viewModel.cargarVentaParaEditar(venta)
                             navController.navigate("ventaForm")
@@ -134,6 +147,7 @@ fun ListaVentasScreen(
 @Composable
 private fun VentaCard(
     venta: VentaEntity,
+    onVerClick: () -> Unit,
     onEditarClick: () -> Unit,
     onEliminarClick: () -> Unit
 ) {
@@ -166,7 +180,12 @@ private fun VentaCard(
         )
     }
 
-    Card(modifier = Modifier.fillMaxWidth()) {
+    // Al tocar la tarjeta se abre el detalle con el historial de cambios
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onVerClick() }
+    ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -180,26 +199,24 @@ private fun VentaCard(
                     text = venta.codigoAutorizacion,
                     style = MaterialTheme.typography.titleMedium
                 )
-                Text(
-                    text = venta.estado,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                EstadoChip(venta.estado)
             }
 
-            Text("Servicio: ${venta.tipoServicio}")
+            Text("Convenio: ${venta.tipoServicio}")
             Text("Cliente: ${venta.cliente}")
             Text("Fecha: ${venta.fechaOperacion}")
-            Text("Monto: $${"%,.0f".format(venta.monto)}")
+            Text("Monto: ${formatoPesos(venta.monto)}")
 
-            venta.respaldo?.let {
+            // Lo que escribió el encargado al revisarla
+            venta.observacionRevision?.let {
                 Text(
-                    text = "Respaldo: $it",
-                    style = MaterialTheme.typography.bodySmall
+                    text = "Encargado: $it",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
                 )
             }
 
-            // Solo se puede modificar mientras no esté validada
+            // Solo se puede modificar mientras no esté validada ni rechazada
             if (venta.esEditable()) {
                 Row {
                     TextButton(onClick = onEditarClick) {
@@ -222,8 +239,8 @@ private fun VentaCard(
                 }
             } else {
                 Text(
-                    text = "Venta validada: no se puede modificar",
-                    color = MaterialTheme.colorScheme.error
+                    text = "Venta ${venta.estado.lowercase()}: no se puede modificar",
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }

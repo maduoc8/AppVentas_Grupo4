@@ -36,6 +36,14 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // Necesario para las pruebas con MockK y JUnit 5 (archivos de licencia repetidos)
+    packaging {
+        resources {
+            excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/LICENSE-notice.md"
+        }
+    }
 }
 
 dependencies {
@@ -85,6 +93,24 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")  // <-- KSP
 
+// Retrofit y Gson Converter (API REST de convenios)
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+// Coil: muestra la foto del comprobante guardada en el teléfono
+    implementation("io.coil-kt:coil-compose:2.7.0")
+
+// Kotest
+    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
+    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+
+// JUnit 5
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+
+// MockK
+    testImplementation("io.mockk:mockk:1.13.10")
+    androidTestImplementation("io.mockk:mockk-android:1.13.10")
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -92,4 +118,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+// 👇 Obligatorio para usar JUnit 5 (Kotest)
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }

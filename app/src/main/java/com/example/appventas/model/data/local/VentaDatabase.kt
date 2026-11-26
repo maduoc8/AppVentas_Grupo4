@@ -7,10 +7,27 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 // Base aparte para las ventas: así UsuarioDatabase queda igual
-@Database(entities = [VentaEntity::class], version = 1)
+// Versión 2: se agregan clientes, convenios, estados, historial y comisiones
+@Database(
+    entities = [
+        VentaEntity::class,
+        ClienteEntity::class,
+        ConvenioEntity::class,
+        EstadoEntity::class,
+        HistorialEntity::class,
+        ComisionEntity::class
+    ],
+    version = 2,
+    exportSchema = false
+)
 abstract class VentaDatabase : RoomDatabase() {
 
     abstract fun ventaDao(): VentaDao
+    abstract fun clienteDao(): ClienteDao
+    abstract fun convenioDao(): ConvenioDao
+    abstract fun estadoDao(): EstadoDao
+    abstract fun historialDao(): HistorialDao
+    abstract fun comisionDao(): ComisionDao
 
     companion object {
         @Volatile
@@ -22,7 +39,10 @@ abstract class VentaDatabase : RoomDatabase() {
                     context.applicationContext,
                     VentaDatabase::class.java,
                     "venta_database"
-                ).build().also { INSTANCE = it }
+                )
+                    // Si cambia la versión se recrea la base (datos de prueba, no reales)
+                    .fallbackToDestructiveMigration(dropAllTables = true)
+                    .build().also { INSTANCE = it }
             }
         } // fin getDatabase
     }

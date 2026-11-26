@@ -7,13 +7,17 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "ventas")
 data class VentaEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val tipoServicio: String,
+    val convenioId: Int? = null,     // convenio elegido del catálogo (Room / API)
+    val tipoServicio: String,        // nombre del convenio o servicio
     val fechaOperacion: String,
-    val cliente: String,
+    val cliente: String,             // cliente ficticio
     val monto: Double,
     val codigoAutorizacion: String,
-    val observaciones: String,
-    val respaldo: String?,       // contenido del QR leído con la cámara
+    val observaciones: String,       // comentario del vendedor
+    val respaldo: String?,           // contenido del QR leído con la cámara
+    val comprobante: String? = null, // ruta de la foto de la boleta o vale
     val estado: String,
-    val vendedorCorreo: String   // vendedor que registró la venta
+    val observacionRevision: String? = null, // comentario del encargado al revisar
+    val vendedorNombre: String = "",
+    val vendedorCorreo: String       // vendedor que registró la venta
 )
