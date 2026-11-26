@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Home
@@ -18,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -44,7 +48,12 @@ fun RegistroScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Crear vendedor") }
+                title = { Text("Crear vendedor") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -53,7 +62,8 @@ fun RegistroScreen(
         Modifier
             .padding(innerPadding)
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
 
@@ -61,7 +71,7 @@ fun RegistroScreen(
         OutlinedTextField(
             value = estado.nombre,
             onValueChange = viewModel::onNombreChange,
-            label = { Text("Nombre") },
+            label = { Text("Nombre (usuario para iniciar sesión)") },
             leadingIcon = {
                 Icon(Icons.Default.Person, contentDescription = "Nombre")
             },

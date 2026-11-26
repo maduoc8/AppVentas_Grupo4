@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "nombre": "Dental Sonrisa Total",
+    "categoria": "Dental",
+    "descripcion": "Limpieza, tapaduras y urgencias dentales",
+    "condiciones": "Hasta 40% de descuento en prestaciones. Carencia de 30 días.",
+    "comision": 5.0
+  },
+  {
+    "id": 2,
+    "nombre": "Taller AutoCheck",
+    "categoria": "Automotriz",
+    "descripcion": "Mantención preventiva y revisión pre-técnica",
+    "condiciones": "20% de descuento en mano de obra. Solo vehículos particulares.",
+    "comision": 4.0
+  },
+  {
+    "id": 3,
+    "nombre": "Clínica VetAmigo",
+    "categoria": "Veterinario",
+    "descripcion": "Consultas y vacunas para mascotas",
+    "condiciones": "Consulta a precio preferente. Máximo 2 mascotas por cliente.",
+    "comision": 6.0
+  },
+  {
+    "id": 4,
+    "nombre": "Óptica VisiónClara",
+    "categoria": "Otros",
+    "descripcion": "Lentes ópticos y de sol",
+    "condiciones": "25% de descuento en marcos. No acumulable con otras promociones.",
+    "comision": 3.0
+  },
+  {
+    "id": 5,
+    "nombre": "OrtoPlus Ortodoncia",
+    "categoria": "Dental",
+    "descripcion": "Brackets, alineadores y controles de ortodoncia",
+    "condiciones": "Evaluación sin costo. Pago en hasta 12 cuotas.",
+    "comision": 7.0
+  },
+  {
+    "id": 6,
+    "nombre": "Neumáticos RutaSegura",
+    "categoria": "Automotriz",
+    "descripcion": "Venta e instalación de neumáticos y alineación",
+    "condiciones": "15% de descuento en neumáticos. Alineación gratis con compra de 4.",
+    "comision": 3.5
+  },
+  {
+    "id": 7,
+    "nombre": "PetSpa Peluquería",
+    "categoria": "Veterinario",
+    "descripcion": "Baño, corte y cuidado para perros y gatos",
+    "condiciones": "Primer baño con 30% de descuento. Requiere reserva.",
+    "comision": 5.0
+  },
+  {
+    "id": 8,
+    "nombre": "GymActivo",
+    "categoria": "Otros",
+    "descripcion": "Plan mensual de gimnasio y clases grupales",
+    "condiciones": "Matrícula gratis. Permanencia mínima de 3 meses.",
+    "comision": 4.5
+  }
+]

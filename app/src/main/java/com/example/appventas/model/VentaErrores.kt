@@ -6,5 +6,6 @@ data class VentaErrores(
     val fecha: String? = null,
     val cliente: String? = null,
     val monto: String? = null,
-    val codigo: String? = null
+    val codigo: String? = null,
+    val comprobante: String? = null
 )

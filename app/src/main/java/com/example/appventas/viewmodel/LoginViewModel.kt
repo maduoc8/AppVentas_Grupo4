@@ -17,6 +17,11 @@ class LoginViewModel (
     var uiState by mutableStateOf(LoginUiState())
         private set
 
+    init {
+        // Deja listo un vendedor de prueba (solo si no existe)
+        viewModelScope.launch { repo.crearVendedorDePrueba() }
+    }
+
     fun onUsernameChange(value:String){
         uiState=uiState.copy(username=value, error=null)
     } // fin onUsernameChange

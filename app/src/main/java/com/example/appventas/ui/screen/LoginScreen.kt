@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -77,7 +80,8 @@ fun LoginScreen(
                .padding(innerPadding)
                .fillMaxSize()
                .padding(16.dp)
-               .background(Color(0xFFF0F0F0)),
+               .background(Color(0xFFF0F0F0))
+               .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
 
@@ -166,6 +170,14 @@ fun LoginScreen(
 Text(if(state.isLoading)  "Validando"  else "Inicia sesion")
 
             }
+
+            // Usuarios precargados para probar la app
+            Text(
+                text = "Usuarios de prueba: admin / 123 (encargado de digitación) · vendedor / 123456",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF555555),
+                textAlign = TextAlign.Center
+            )
 
 
         }//Fin Inicio columna

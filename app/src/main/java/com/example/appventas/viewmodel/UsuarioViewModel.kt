@@ -23,6 +23,15 @@ class UsuarioViewModel(app: Application) : AndroidViewModel(app) {
     // Estado expuesto para la UI
     val estado: StateFlow<UsuarioUiState> = _estado
 
+    init {
+        // Lista de vendedores para el inicio del admin (se actualiza sola al crear uno)
+        viewModelScope.launch {
+            dao.obtenerTodos().collect { lista ->
+                _estado.update { it.copy(usuarios = lista) }
+            }
+        }
+    }
+
     // Actualiza el campo nombre y limpia su error
     fun onNombreChange(valor: String) {
         _estado.update {
@@ -112,8 +121,8 @@ class UsuarioViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             dao.insertar(
                 UsuarioEntity(
-                    nombre = a.nombre,
-                    correo = a.correo,
+                    nombre = a.nombre.trim(),
+                    correo = a.correo.trim(),
                     clave = a.clave,
                     direccion = a.direccion
                 )
@@ -122,8 +131,8 @@ class UsuarioViewModel(app: Application) : AndroidViewModel(app) {
         }
     } // fin guardar
 
-    // Deja el formulario vacío para registrar otro vendedor
+    // Deja el formulario vacío para registrar otro vendedor (conserva la lista)
     fun limpiarFormulario() {
-        _estado.value = UsuarioUiState()
+        _estado.update { UsuarioUiState(usuarios = it.usuarios) }
     } // fin limpiarFormulario
 }

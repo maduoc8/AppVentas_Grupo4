@@ -11,8 +11,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface VentaDao {
 
+    // Devuelve el id de la venta nueva (se usa para el historial)
     @Insert
-    suspend fun insertar(venta: VentaEntity)
+    suspend fun insertar(venta: VentaEntity): Long
 
     @Update
     suspend fun actualizar(venta: VentaEntity)
@@ -24,9 +25,20 @@ interface VentaDao {
     @Query("SELECT * FROM ventas WHERE vendedorCorreo = :correo ORDER BY id DESC")
     fun obtenerPorVendedor(correo: String): Flow<List<VentaEntity>>
 
+    // Todas las ventas recibidas (lo que ve el encargado de digitación)
+    @Query("SELECT * FROM ventas ORDER BY id DESC")
+    fun obtenerTodas(): Flow<List<VentaEntity>>
+
     @Query("SELECT * FROM ventas WHERE id = :id")
     suspend fun obtenerPorId(id: Long): VentaEntity?
 
+    // Igual que obtenerPorId, pero se actualiza solo cuando la venta cambia
+    @Query("SELECT * FROM ventas WHERE id = :id")
+    fun observarPorId(id: Long): Flow<VentaEntity?>
+
     @Query("SELECT * FROM ventas WHERE UPPER(codigoAutorizacion) = UPPER(:codigo) LIMIT 1")
     suspend fun obtenerPorCodigo(codigo: String): VentaEntity?
+
+    @Query("SELECT COUNT(*) FROM ventas WHERE UPPER(codigoAutorizacion) = UPPER(:codigo)")
+    suspend fun contarPorCodigo(codigo: String): Int
 }
