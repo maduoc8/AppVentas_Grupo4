@@ -14,3 +14,7 @@
 .cxx
 local.properties
 .kotlin
+# Firma del APK release (clave privada): nunca subir a GitHub
+keystore.properties
+*.jks
+/app/release
