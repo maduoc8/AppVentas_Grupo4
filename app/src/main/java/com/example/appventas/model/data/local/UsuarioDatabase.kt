@@ -21,7 +21,10 @@ abstract class UsuarioDatabase : RoomDatabase() {
                     context.applicationContext,
                     UsuarioDatabase::class.java,
                     "usuario_database"
-                ).build().also { INSTANCE = it }
+                )
+                    // Si cambia la versión se recrea la base (datos de prueba, no reales)
+                    .fallbackToDestructiveMigration(dropAllTables = true)
+                    .build().also { INSTANCE = it }
             }
         } // fin getDatabase
     }

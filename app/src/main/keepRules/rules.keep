@@ -10,3 +10,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Gson (Retrofit) llena Convenio por reflexión usando los nombres de los campos del JSON:
+# R8 no debe renombrarlos ni borrarlos en el APK release
+-keep class com.example.appventas.model.Convenio { *; }
