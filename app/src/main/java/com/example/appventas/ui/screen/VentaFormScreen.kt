@@ -4,7 +4,9 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +33,8 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,13 +42,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -53,11 +61,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.appventas.model.fechaDeHoy
 import com.example.appventas.ui.components.FotoComprobante
 import com.example.appventas.ui.components.SelectorLista
 import com.example.appventas.utils.ComprobanteHelper
 import com.example.appventas.viewmodel.VentaViewModel
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -169,14 +182,12 @@ fun VentaFormScreen(
             error = estado.errores.cliente
         )
 
-        // Campo fecha
-        CampoVenta(
+        // Campo fecha: se elige en un calendario (no se escribe a mano)
+        SelectorFecha(
             valor = estado.fechaOperacion,
-            onValorChange = viewModel::onFechaChange,
+            onFechaSeleccionada = viewModel::onFechaChange,
             etiqueta = "Fecha de operación",
-            icono = Icons.Default.CalendarMonth,
-            error = estado.errores.fecha,
-            ayuda = "Formato dd/mm/aaaa"
+            error = estado.errores.fecha
         )
 
         // Campo monto (teclado numérico)
@@ -293,6 +304,98 @@ fun VentaFormScreen(
     }
     }
 } // fin VentaFormScreen
+
+// El DatePicker trabaja en milisegundos UTC: se usa UTC para no correr la fecha un día
+private fun formatoFechaUtc() = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
+    timeZone = TimeZone.getTimeZone("UTC")
+    isLenient = false
+}
+
+// "dd/mm/aaaa" -> milisegundos UTC (null si el texto no es una fecha válida)
+private fun fechaAMillis(fecha: String): Long? =
+    try {
+        formatoFechaUtc().parse(fecha.trim())?.time
+    } catch (e: Exception) {
+        null
+    }
+
+// Campo de fecha: al tocarlo abre un calendario; no se puede elegir una fecha futura
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SelectorFecha(
+    valor: String,
+    onFechaSeleccionada: (String) -> Unit,
+    etiqueta: String,
+    error: String? = null
+) {
+    var mostrarCalendario by remember { mutableStateOf(false) }
+
+    Box {
+        OutlinedTextField(
+            value = valor,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(etiqueta) },
+            leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = etiqueta) },
+            trailingIcon = {
+                if (error != null) {
+                    Icon(
+                        Icons.Default.Error,
+                        contentDescription = "Error",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            isError = error != null,
+            supportingText = {
+                if (error != null) {
+                    Text(text = error, color = MaterialTheme.colorScheme.error)
+                } else {
+                    Text(text = "Toca para elegir la fecha")
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+        // Capa transparente encima del campo: al tocarlo se abre el calendario
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { mostrarCalendario = true }
+        )
+    }
+
+    if (mostrarCalendario) {
+        // Hoy (en la zona del teléfono) pasado a UTC: es el último día que se puede elegir
+        val hoyMillis = fechaAMillis(fechaDeHoy()) ?: System.currentTimeMillis()
+
+        val estadoCalendario = rememberDatePickerState(
+            initialSelectedDateMillis = fechaAMillis(valor) ?: hoyMillis,
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                    utcTimeMillis <= hoyMillis
+            }
+        )
+
+        DatePickerDialog(
+            onDismissRequest = { mostrarCalendario = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        estadoCalendario.selectedDateMillis?.let {
+                            onFechaSeleccionada(formatoFechaUtc().format(Date(it)))
+                        }
+                        mostrarCalendario = false
+                    }
+                ) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarCalendario = false }) { Text("Cancelar") }
+            }
+        ) {
+            DatePicker(state = estadoCalendario)
+        }
+    }
+} // fin SelectorFecha
 
 // Campo de texto con ícono y mensaje de error, igual en todo el formulario
 @Composable
